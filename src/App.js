@@ -1,35 +1,35 @@
-// src/App.js
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-class App extends React.Component{
-  constructor(props) {
-    super(props);
-    this.state = {
-      title: null
-    }
-  }
+function App() {
+  const [placeholder, setPlaceholder] = useState('Hi');
 
-  componentDidMount() {
-    fetch('http://localhost:3001/api')
-      .then(res => res.json())
-      .then(data => this.setState({title: data.title}));
-  }
+  useEffect(() => {
+    fetch('/hello').then(res => res.json()).then(data => {
+      setPlaceholder(data.result);
+    });
+  }, []);
 
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <div>
-            {this.state.title? <h1>{this.state.title}</h1>:<h1>loading...</h1>}
-          </div>
-        </header>
-      </div>
-    );
-  }
+  return (
+    <div className="App">
+      <header className="App-header">
+        <img src={logo} className="App-logo" alt="logo" />
+        <p>
+          Edit <code>src/App.js</code> and save to reload.
+        </p>
+        <a
+          className="App-link"
+          href="https://reactjs.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Learn React
+        </a>
+        <p>Flask says {placeholder}</p>
+      </header>
+    </div>
+  );
 }
 
 export default App;
