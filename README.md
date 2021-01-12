@@ -34,3 +34,8 @@ This folder structure is default for React (except : flask_server)
 │
 └── App.js                    - components들을 넣을 상위 컴포넌트
 ```
+
+## Steps
+
+in /flask_server  -> flask run  
+in ./             -> npm run start  
