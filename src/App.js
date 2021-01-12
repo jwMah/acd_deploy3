@@ -1,35 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+import './App.css'
+import Home from './components/Home';
+import Result from './components/Result';
 
-function App() {
-  const [placeholder, setPlaceholder] = useState('Hi');
+class App extends React.Component{
+  constructor(props) {
+    super(props);
+    this.state = {
+       img_state : ""
+    };
+  }
+  
+  render(){
+    console.log("App render");
+    return (
+      <div className="app">
+        <h2> Adult Contents Detector</h2>
+        <hr></hr>
+        <BrowserRouter>
+            <Switch>
+                <Route exact path="/">
+                  <Home></Home>
+                </Route>
 
-  useEffect(() => {
-    fetch('/hello').then(res => res.json()).then(data => {
-      setPlaceholder(data.result);
-    });
-  }, []);
-
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <p>Flask says {placeholder}</p>
-      </header>
-    </div>
-  );
+                <Route path='/result' component={Result}/>
+            </Switch>
+          </BrowserRouter>
+      </div>
+    );
+  }
 }
 
 export default App;
