@@ -47,6 +47,7 @@ class Home extends React.Component{
         var home_this = this;
         var formData = new FormData();
         formData.append("file", photoFile.files[0]);
+        formData.append("image_type", "1");
 
         api.post('/detect', formData, {
             headers: {
@@ -63,23 +64,24 @@ class Home extends React.Component{
         });
     }
 
-
     url_api_call(url_input){
-        console.log("url_api_call")
-        console.log("수정 필요")
-        console.log(url_input)
         
         const api = axios.create({
             baseURL: 'http://localhost:5000'
         })
+        var home_this = this;
+        var formData = new FormData();
+        formData.append("image_url", url_input);
+        formData.append("image_type", "0");
         
-        api.post('/detect', {
-            image_url : url_input
-          })
+        api.post('/detect', formData)
           .then(function (response) {
             console.log(response);
+            home_this.setState({
+                page_change_flag:1,
+                response_data:response.data
           })
-          .catch(function (error) {
+        }).catch(function (error) {
             console.log(error);
           });
     }

@@ -9,18 +9,17 @@ CORS(app)
 
 @app.route('/detect', methods=['POST'])
 def detect():
-    if request.files['file'] != "" :
+    if request.form['image_type'] == "1" :
         input_img = request.files['file']
         input_img_filename = secure_filename(input_img.filename)
         print(input_img)
         input_img.save(os.path.join('./data/', input_img_filename))
         detect_result = kakao_api.detect_adult('./data/'+input_img_filename, 1)
         return {'result' : detect_result}
-    elif request.form['input_url']!= "":
-        print("hihi boss")
-        detect_result = test_kakao.detect_adult(img_url, 0)
+    elif request.form['image_type'] == "0":
+        img_url = request.form['image_url']
+        detect_result = kakao_api.detect_adult(img_url, 0)
         return {"result" : detect_result}
-    else : print("hihi bosselse")
     '''
     if img_url != "":
         detect_result = test_kakao.detect_adult(img_url, 0)
