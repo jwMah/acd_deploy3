@@ -27,8 +27,8 @@ def detect_adult(image_url, image_type):
         resp.raise_for_status()
         result = resp.json()['result']
 
-        #return {'adult' : result['adult']*100, 'soft' : result['soft']*100, 'normal' : result['normal']*100}
         return ("Adult Percentage : {:3f}%  Soft Percentage : {:3f}%  Normal Percentage {:3f}%".format(result['adult'] * 100, result['soft'] * 100, result['normal'] * 100))
+        
 
     except Exception as e:
         print(str(e))
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Classify adult image')
     parser.add_argument('image_url', type=str, nargs='?',
         # default="http://t1.daumcdn.net/alvolo/_vision/openapi/r2/images/10.jpg",
-        default="././app/static/image/poc_result.JPG",
+        default="././flask_server/data/2021-01-12_09-32-39.png",
         help='image url to classify')
     args = parser.parse_args()
     print(args)
