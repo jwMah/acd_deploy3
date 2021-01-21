@@ -26,8 +26,11 @@ def detect_adult(image_url, image_type):
             resp = requests.post(API_URL,headers=headers,files=files)
         resp.raise_for_status()
         result = resp.json()['result']
-
-        return ("Adult Percentage : {:3f}%  Soft Percentage : {:3f}%  Normal Percentage {:3f}%".format(result['adult'] * 100, result['soft'] * 100, result['normal'] * 100))
+        if result['adult']>result['soft'] and result['adult']>result['normal']:
+            return 1
+        else:
+            return 0
+        #return ("Adult Percentage : {:3f}%  Soft Percentage : {:3f}%  Normal Percentage {:3f}%".format(result['adult'] * 100, result['soft'] * 100, result['normal'] * 100))
         
 
     except Exception as e:

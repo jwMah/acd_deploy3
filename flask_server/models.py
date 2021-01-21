@@ -1,14 +1,19 @@
 from app import db
 class img_upload(db.Model):
-    __tablename__ = 'imgdir_table'
+    __tablename__ = 'adult_detector_db'
 
     
-    img_type = db.Column(db.String())
-    imgdir = db.Column(db.Text,primary_key=True)
+    id = db.Column(db.Integer,primary_key=True)
+    video_name = db.Column(db.String())
+    imgdir = db.Column(db.Text)
+    time = db.Column(db.String(6))
+    censored = db.Column(db.Integer)
 
-    def __init__(self, img_type, imgdir):
-        self.img_type = img_type
+    def __init__(self, video_name, imgdir, time, censored):
+        self.video_name = video_name
         self.imgdir = imgdir
+        self.time = time
+        self.censored = censored
 
     # def __repr__(self):
     #     return '<id {}>'.format(self.name)

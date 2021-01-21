@@ -1,9 +1,9 @@
 from app import db
 import models
 
-def add(img_type,imgdir):
-    img = models.img_upload(img_type,imgdir)
-    db.session.add(img)
+def add(video_name, imgdir, time, censored):
+    temp = models.img_upload(video_name, imgdir, time, censored)
+    db.session.add(temp)
     db.session.commit()
 
 def read():
