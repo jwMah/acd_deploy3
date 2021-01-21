@@ -37,5 +37,6 @@ This folder structure is default for React (except : flask_server)
 
 ## Steps
 
+in /flask_server  -> celery -A app.celery worker --loglevel=info
 in /flask_server  -> flask run  
 in ./             -> npm run start  

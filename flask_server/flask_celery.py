@@ -1,7 +1,7 @@
 from celery import Celery
 
-# rabbitmq 각자 id:비번@주소:기본포트
-BROKER_URL = 'amqp://root:root@localhost:5672/'
+# amqp://[username]:[password]@localhost:5672/
+BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 
 def make_celery(app):
     cell =  Celery(app.import_name, broker=BROKER_URL, )
