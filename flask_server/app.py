@@ -61,7 +61,7 @@ def detect():
                     
                 result['over'] = censored_one / count
                 result['under'] = censored_zero / count
-                return {'result' : detect_result}
+                return {'result' : result }
 
     #     detect_result = kakao_api.detect_adult('./data/'+input_img_filename, 1)
     #     # dbcon.add('img_file','/flask_server/data/'+input_img_filename)
