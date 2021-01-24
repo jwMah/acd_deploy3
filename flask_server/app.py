@@ -9,6 +9,7 @@ from flask_migrate import Migrate
 from datetime import datetime
 from datetime import timedelta
 from flask_celery import make_celery
+from function import gcp_control
 
 
 config = configparser.ConfigParser()
@@ -28,50 +29,34 @@ import tasks
 # import dbcon
 @app.route('/detect', methods=['POST'])
 def detect():
+    # TODO : check file posted normally
     if request.form['image_type'] == "1" :
-        input_img = request.files['file']
-        input_img_filename = secure_filename(input_img.filename)
-        input_img.save(os.path.join('./data/', input_img_filename))
-        file_path='././data/'+input_img_filename
-        video_temp = 0
+        input_video = request.files['file']
+        video_filename=input_video.filename
 
-        # video 처리
-        if input_img_filename.split('.')[-1] == 'mp4':
-            if video_temp == 0:
-                video_temp = 1
-                res = ffmpeg.video_to_Img(file_path, input_img_filename)
-                list_dir = []
-                list_dir = os.listdir(res)
+        # upload video to gcp storage
+        gcp_control.upload_blob_file('teamg_images',input_video,input_video.filename)
+        video_path = 'https://storage.googleapis.com/teamg_images/'+video_filename
+
+        list_dir = ffmpeg.video_to_Img(video_path,video_filename)
                 
-                result = {}
-                count=0
-                censored_zero = 0
-                censored_one = 0
+        result = {}
+        count=0
+        censored_zero = 0
+        censored_one = 0
                 
-                for filename in list_dir:
-                    count += 1
-                    detect_result = kakao_api.detect_adult(res + '/' + filename, 1)
-                    eta = datetime.utcnow() + timedelta(seconds=2)
-                    tasks.async_Add.apply_async(args=[input_img_filename, file_path, count*30,detect_result], kwargs={},eta=eta)
-                    # dbcon.add(input_img_filename,file_path,count*30,detect_result)
-                    if detect_result == 0:
-                        censored_zero += 1
-                    else:
-                        censored_one += 1
+        for filename in list_dir:
+            count += 1
+            print(video_path + '/' + filename)
+            detect_result = kakao_api.detect_adult(video_path + '/' + filename, 0)
+            eta = datetime.utcnow() + timedelta(seconds=2)
+            tasks.async_Add.apply_async(args=[video_filename, video_path + '/' + filename, count*30,detect_result], kwargs={},eta=eta)
+
+            if detect_result == 0:
+                censored_zero += 1
+            else:
+                censored_one += 1
                     
-                result['over'] = censored_one / count
-                result['under'] = censored_zero / count
-                return {'result' : result }
-
-    #     detect_result = kakao_api.detect_adult('./data/'+input_img_filename, 1)
-    #     # dbcon.add('img_file','/flask_server/data/'+input_img_filename)
-    #     img_type = 'img_file'
-    #     eta = datetime.utcnow() + timedelta(seconds=2)
-    #     tasks.async_Add.apply_async(args=[img_type, './data/'+input_img_filename], kwargs={},eta=eta)
-    #     return {'result' : detect_result}
-
-    # elif request.form['image_type'] == "0":
-    #     img_url = request.form['image_url']
-    #     detect_result = kakao_api.detect_adult(img_url, 0)
-    #     dbcon.add('img_url',img_url)
-    #     return {"result" : detect_result}
+        result['over'] = censored_one / count
+        result['under'] = censored_zero / count
+        return {'result' : result }

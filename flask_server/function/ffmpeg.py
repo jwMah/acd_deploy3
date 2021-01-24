@@ -1,19 +1,28 @@
 import subprocess
 import os
+import ffmpeg
+from function import gcp_control
 
+def video_to_Img(file_path,video_filename):
+    
+    ffmpeg.input(file_path).filter('fps', fps='1/60').output('data/frm-%d.jpg', start_number=0).overwrite_output().run(quiet=True)
+    
+    list_dir = []
+    list_dir = os.listdir('././data')
+    
+    for filename in list_dir:
+        # upload local image files to gcp storage
+        gcp_control.upload_blob_filename('teamg_images','data/' + filename, video_filename+'/'+filename)
+        # delete local image files
+        os.remove('././data/' + filename)
+    
+    return list_dir
 
+    # out,err = result.communicate()
+    # exitcode = result.returncode
 
-def video_to_Img(file_path, img_filename):
-    #workdir은 자기 local주소에서 flask_server/data/screenshot 주소로 바꿔서 하세여
-    workdir = 'C:/Users/MYCOM/Desktop/Project/ScliconBelly/Project/Flask_React_2nd_Type/flask_server/data/screenshot'
-
-    result = subprocess.Popen(['ffmpeg', '-y', '-i', file_path, '-vf', 'fps=1/30', workdir + '/' + img_filename.split('.')[0] + '_img%03d.jpg'],
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out,err = result.communicate()
-    exitcode = result.returncode
-
-    if exitcode !=0:
-        print(exitcode, out.decode('utf8'), err.decode('utf8'))
-    else:
-        print('Completed')
-        return workdir
+    # if exitcode !=0:
+    #     print(exitcode, out.decode('utf8'), err.decode('utf8'))
+    # else:
+    #     print('Completed')
+        # return workdir

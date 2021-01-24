@@ -16,5 +16,3 @@ def make_celery(app):
 
     cell.Task = ContextTask
     return cell
-
-

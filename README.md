@@ -26,6 +26,7 @@ npm install                                           # 의존성 파일 설치
 
 # Then:
 cd flask_server/
+export GOOGLE_APPLICATION_CREDENTIALS = "my-key.json" # for GCS upload key
 celery -A app.celery worker --loglevel=info           # for rabbitMQ
 FLASK_APP = swagger.py flask run -h 0.0.0.0 -p 9991   # for swagger (0.0.0.0:9991)
 flask run

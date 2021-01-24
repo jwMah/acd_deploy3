@@ -41,9 +41,9 @@ def detect_adult(image_url, image_type):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Classify adult image')
     parser.add_argument('image_url', type=str, nargs='?',
-        # default="http://t1.daumcdn.net/alvolo/_vision/openapi/r2/images/10.jpg",
-        default="././flask_server/data/2021-01-12_09-32-39.png",
+        default='https://storage.googleapis.com/teamg_images/rabbit.mp4/frm-1.jpg',
+        # default="././flask_server/data/2021-01-12_09-32-39.png",
         help='image url to classify')
     args = parser.parse_args()
     print(args)
-    detect_adult(args.image_url,1)
+    detect_adult(args.image_url,0)
