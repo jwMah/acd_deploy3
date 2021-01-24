@@ -1,7 +1,7 @@
 import subprocess
 import os
-import ffmpeg
 from function import gcp_control
+import ffmpeg
 
 def video_to_Img(file_path,video_filename):
     
@@ -9,6 +9,7 @@ def video_to_Img(file_path,video_filename):
     
     list_dir = []
     list_dir = os.listdir('././data')
+    list_dir.remove('.keep')
     
     for filename in list_dir:
         # upload local image files to gcp storage
