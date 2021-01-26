@@ -27,36 +27,73 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 import tasks
 # import dbcon
+
+import pytube
+from pytube.cli import on_progress 
+# import pytube ( get video from youtube link )
+
+
 @app.route('/detect', methods=['POST'])
 def detect():
-    # TODO : check file posted normally
+    
+    Your_input = ''
+    video_filename = ''
+
+    # TODO : check file posted normally ( Local video file )
     if request.form['image_type'] == "1" :
-        input_video = request.files['file']
-        video_filename=input_video.filename
+        Your_input = request.files['file']
+        video_filename=Your_input.filename
+        gcp_control.upload_blob_file('teamg_images',Your_input,video_filename)
 
-        # upload video to gcp storage
-        gcp_control.upload_blob_file('teamg_images',input_video,input_video.filename)
-        video_path = 'https://storage.googleapis.com/teamg_images/'+video_filename
+    # check URL posted normally ( Youtube or other video service )
+    elif request.form['image_type'] == "0" :
+        Your_input = request.form['image_url']
+        print(Your_input)
 
-        list_dir = ffmpeg.video_to_Img(video_path,video_filename)
+        # if this url is youtube, use pytube module!
+        Your_PyTube = pytube.YouTube(Your_input, on_progress_callback=on_progress)
+        print(Your_PyTube.streams)
+        video_filename = Your_PyTube.title
+        
+        # String 전처리
+        #mylist = ['.', '`']
+        video_filename = video_filename.replace(".", "")
+        video_filename = video_filename.replace("'", "")
+
+
+        # download youtube mp4 at our storage from youtube link
+        temp_dir_path = './data/' 
+        Your_PyTube.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first().download(temp_dir_path)
+        
+
+        # set input url to local path located in youtube mp4 file
+        Your_input = temp_dir_path + video_filename + ".mp4"
+        gcp_control.upload_blob_filename('teamg_images',Your_input,video_filename)
+        os.remove(Your_input)
+
+    # ( 공통 process ) upload video to gcp storage
+    video_path = 'https://storage.googleapis.com/teamg_images/'+video_filename
+
+    list_dir = ffmpeg.video_to_Img(video_path,video_filename)
                 
-        result = {}
-        count=0
-        censored_zero = 0
-        censored_one = 0
+    result = {}
+    count=0
+    censored_zero = 0
+    censored_one = 0
                 
-        for filename in list_dir:
-            count += 1
-            print(video_path + '/' + filename)
-            detect_result = kakao_api.detect_adult(video_path + '/' + filename, 0)
-            eta = datetime.utcnow() + timedelta(seconds=2)
-            tasks.async_Add.apply_async(args=[video_filename, video_path + '/' + filename, count*30,detect_result], kwargs={},eta=eta)
+    for filename in list_dir:
+        count += 1
+        print(video_path + '/' + filename)
+        detect_result = kakao_api.detect_adult(video_path + '/' + filename, 0)
+        eta = datetime.utcnow() + timedelta(seconds=2)
+        tasks.async_Add.apply_async(args=[video_filename, video_path + '/' + filename, count*30,detect_result], kwargs={},eta=eta)
 
-            if detect_result == 0:
-                censored_zero += 1
-            else:
-                censored_one += 1
+        if detect_result == 0:
+            censored_zero += 1
+        else:
+            censored_one += 1
                     
-        result['over'] = censored_one / count
-        result['under'] = censored_zero / count
-        return {'result' : result }
+    result['over'] = censored_one / count
+    result['under'] = censored_zero / count
+    return {'result' : result }
+
