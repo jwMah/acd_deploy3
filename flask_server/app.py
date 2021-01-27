@@ -31,7 +31,7 @@ import tasks
 import pytube
 from pytube.cli import on_progress 
 # import pytube ( get video from youtube link )
-
+import views
 
 @app.route('/detect', methods=['POST'])
 def detect():
@@ -44,6 +44,8 @@ def detect():
         Your_input = request.files['file']
         video_filename=Your_input.filename
         gcp_control.upload_blob_file('teamg_images',Your_input,video_filename)
+        video_path = 'https://storage.googleapis.com/teamg_images/'+video_filename
+        views.video_insert('local',video_filename,video_path)
 
     # check URL posted normally ( Youtube or other video service )
     elif request.form['image_type'] == "0" :
@@ -70,9 +72,13 @@ def detect():
         Your_input = temp_dir_path + video_filename + ".mp4"
         gcp_control.upload_blob_filename('teamg_images',Your_input,video_filename)
         os.remove(Your_input)
+        video_path = 'https://storage.googleapis.com/teamg_images/'+video_filename
+        views.video_insert('youtube',video_filename,video_path)
+
+    
 
     # ( 공통 process ) upload video to gcp storage
-    video_path = 'https://storage.googleapis.com/teamg_images/'+video_filename
+    
 
     list_dir = ffmpeg.video_to_Img(video_path,video_filename)
                 
@@ -80,13 +86,16 @@ def detect():
     count=0
     censored_zero = 0
     censored_one = 0
-                
+    
+    contents_id = views.get_video_id(video_filename)
+
     for filename in list_dir:
         count += 1
-        print(video_path + '/' + filename)
+        location = video_path + '/' + filename
         detect_result = kakao_api.detect_adult(video_path + '/' + filename, 0)
-        eta = datetime.utcnow() + timedelta(seconds=2)
-        tasks.async_Add.apply_async(args=[video_filename, video_path + '/' + filename, count*30,detect_result], kwargs={},eta=eta)
+        views.frame_insert(contents_id, location, filename, count*30000, detect_result)
+        #eta = datetime.utcnow() + timedelta(seconds=2)
+        #tasks.async_Add.apply_async(args=[video_filename, video_path + '/' + filename, count*30,detect_result], kwargs={},eta=eta)
 
         if detect_result == 0:
             censored_zero += 1

@@ -5,10 +5,15 @@ import models
 from app import app, db
 
 
-def add(video_name, imgdir, time, censored):
-    input_img = models.img_upload(video_name, imgdir, time, censored)
-    db.session.add(input_img)
+def video_insert(video_type, contents_name, location):
+    video_temp = models.video_table(video_type, contents_name, location)
+    db.session.add(video_temp)
     db.session.commit()
 
-# def read():
-#     return models.img_upload.query.count(), db.session.query(models.img_upload).all()
+def frame_insert(contents_id, location, file_name, time_frame, ml_censored):
+    frame_temp = models.img_table(contents_id, location, file_name, time_frame, ml_censored)
+    db.session.add(frame_temp)
+    db.session.commit()
+
+def get_video_id(contents_name):
+    return db.session.query(models.video_table.id).filter(models.video_table.contents_name == contents_name).first()
