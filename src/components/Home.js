@@ -9,7 +9,8 @@ class Home extends React.Component{
         this.state = {
             page_change_flag : 0,           //button -> result
             btn_clicked_flag : 0,           //detectClick && -> flag = 1 
-            response_data : ""              //back -> response -> result.js
+            response_data : "",              //back -> response -> result.js
+            response_img_list : []
         };
     }
 
@@ -32,16 +33,14 @@ class Home extends React.Component{
         e.preventDefault();
         var photoFile = document.getElementById("input_img");
         var url_input = document.getElementById("img_url").value;
-
+        var flag = 0;
         if(photoFile.files[0]!==undefined) {
-            
             this.setState({btn_clicked_flag: 1});  // set btn_flag = 1
-            this.file_api_call(photoFile);
+            flag = this.file_api_call(photoFile);
         }
         else if(url_input !== ''){
-            
             this.setState({btn_clicked_flag: 1});  // set btn_flag = 1
-            this.url_api_call(url_input);
+            flag = this.url_api_call(url_input);
         } else {
             // photoFile and url_input both are all empty -> pass
         }
@@ -49,6 +48,27 @@ class Home extends React.Component{
         // Input 입력값을 모두 초기화!
         photoFile.files = null;
         document.getElementById("img_url").value = null;
+
+        
+    }
+
+    make_img_list(){
+        var detect_this = this;
+
+        const api = axios.create({
+            baseURL: 'http://localhost:5000'
+        })
+        
+        api.post('/readdb')
+        .then(function (response) {
+            console.log(response.data);
+            detect_this.setState({
+                page_change_flag:1,
+                response_img_list:response.data
+            })
+        }).catch(function (error) {
+            console.log(error);
+        });
     }
 
     //file 처리
@@ -69,10 +89,10 @@ class Home extends React.Component{
         }).then(function (response) {
             console.log(response);
             home_this.setState({
-                
-                page_change_flag:1,
                 response_data:response.data
             })
+            home_this.make_img_list()
+            return 1;
         }).catch(function (error) {
             console.log(error);
         });
@@ -92,9 +112,10 @@ class Home extends React.Component{
           .then(function (response) {
             console.log(response);
             home_this.setState({
-                page_change_flag:1,
                 response_data:response.data
           })
+          home_this.make_img_list()
+          return 1;
         }).catch(function (error) {
             console.log(error);
           });
@@ -106,7 +127,8 @@ class Home extends React.Component{
             return <Redirect to={{
                 pathname: '/result',
                 state : {
-                    response_data : this.state.response_data
+                    response_data : this.state.response_data,
+                    response_img_list : this.state.response_img_list
                 }
             }}></Redirect>
         }

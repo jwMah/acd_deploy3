@@ -33,9 +33,11 @@ from pytube.cli import on_progress
 # import pytube ( get video from youtube link )
 import views
 
+video_id = 0
+
 @app.route('/detect', methods=['POST'])
 def detect():
-    
+    global video_id
     Your_input = ''
     video_filename = ''
 
@@ -86,6 +88,7 @@ def detect():
     censored_one = 0
     
     contents_id = views.get_video_id(video_filename)
+    video_id = contents_id
 
     for filename in list_dir:
         count += 1
@@ -115,8 +118,10 @@ def detect():
 # read contents analysis from DB
 @app.route('/readdb', methods=['POST'])
 def readdb():
-
-    contents_analysis = views.frame_read(detect.contents_id)
+    global video_id
+    print('--------------')
+    print(video_id)
+    contents_analysis = views.frame_read(video_id)
 
     img_dict={}
     img={}
@@ -130,6 +135,8 @@ def readdb():
 
         img_dict[idx]=img
         idx += 1
+
+    print(img_dict)
 
     return {'img_dict' : img_dict }
 

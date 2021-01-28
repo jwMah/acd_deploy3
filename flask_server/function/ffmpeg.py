@@ -5,7 +5,7 @@ import ffmpeg
 
 def video_to_Img(file_path,video_filename):
     
-    ffmpeg.input(file_path).filter('fps', fps='1/60').output('data/frm-%d.jpg', start_number=0).overwrite_output().run(quiet=True)
+    ffmpeg.input(file_path).filter('fps', fps='1/30').output('data/frm-%d.jpg', start_number=0).overwrite_output().run(quiet=True)
     
     list_dir = []
     list_dir = os.listdir('././data')
