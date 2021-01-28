@@ -9,6 +9,7 @@
 */
 
 import React from 'react';
+import ReactPlayer from 'react-player'
 import { VictoryPie, VictoryTheme }from 'victory';
 
 class Result extends React.Component{
@@ -31,13 +32,22 @@ class Result extends React.Component{
         data={My_data}></VictoryPie>;
       }
 
+      make_Video(){
+          const _Video_URL = this.state.response_data.result.video_URL;
+          console.log(_Video_URL);
+
+          return  <ReactPlayer playing controls url = {_Video_URL} className='react-player' width="800px" height="800px"/>;
+      }
+
     render(){
         console.log(this.state.response_data.result); 
         console.log(this.state.response_data.result.over);
         console.log(this.state.response_data.result.under);
+        console.log(this.state.response_data.result.video_URL);
         return (
         <div className="result">
             <h2>Result</h2>
+            <div className='player-wrapper' >{this.make_Video()}</div>
             <svg width="400" height="400" viewBox="0 0 400 400" >{this.make_PieChart()}</svg>
         </div>
         );

@@ -102,6 +102,11 @@ def detect():
 
     result['over'] = censored_one / count
     result['under'] = censored_zero / count
+
+    # get Video Access URL from GCP storage
+    myURL = gcp_control.generate_download_signed_url_v4('teamg_images', video_filename)
+    result['video_URL'] = myURL
+    print(result)
     return {'result' : result }
 
     
