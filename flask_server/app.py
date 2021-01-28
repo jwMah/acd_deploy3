@@ -54,7 +54,6 @@ def detect():
 
         # if this url is youtube, use pytube module!
         Your_PyTube = pytube.YouTube(Your_input, on_progress_callback=on_progress)
-        print(Your_PyTube.streams)
         video_filename = Your_PyTube.title
         
         # String 전처리
@@ -77,11 +76,10 @@ def detect():
 
     
 
-    # ( 공통 process ) upload video to gcp storage
-    
-
+    # ( 공통 process ) upload frames to gcp storage
     list_dir = ffmpeg.video_to_Img(video_path,video_filename)
-                
+
+    # insert contents analysis to DB            
     result = {}
     count=0
     censored_zero = 0
@@ -101,8 +99,33 @@ def detect():
             censored_zero += 1
         else:
             censored_one += 1
-                    
+
     result['over'] = censored_one / count
     result['under'] = censored_zero / count
     return {'result' : result }
+
+    
+
+    
+# read contents analysis from DB
+@app.route('/readdb', methods=['POST'])
+def readdb():
+
+    contents_analysis = views.frame_read(detect.contents_id)
+
+    img_dict={}
+    img={}
+    idx = 0
+
+    for id, location, time_frame, ml_censored in contents_analysis:
+        img['id'] = id
+        img['location'] = location
+        img['time_frame'] = time_frame
+        img['ml_censored'] = ml_censored
+
+        img_dict[idx]=img
+        idx += 1
+
+    return {'img_dict' : img_dict }
+
 

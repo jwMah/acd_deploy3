@@ -17,3 +17,6 @@ def frame_insert(contents_id, location, file_name, time_frame, ml_censored):
 
 def get_video_id(contents_name):
     return db.session.query(models.video_table.id).filter(models.video_table.contents_name == contents_name).first()
+
+def frame_read(video_id):
+    return db.session.query(models.img_table.id,models.img_table.location,models.img_table.time_frame,models.img_table.ml_censored).filter(models.img_table.contents_id == video_id).all()
