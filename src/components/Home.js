@@ -1,12 +1,14 @@
 import React from 'react';
 import { Redirect  } from 'react-router-dom';
+import Spinner from 'react-bootstrap/Spinner';
 import axios from 'axios';
 
 class Home extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
-            page_change_flag : 0,           //button -> result 
+            page_change_flag : 0,           //button -> result
+            btn_clicked_flag : 0,           //detectClick && -> flag = 1 
             response_data : ""              //back -> response -> result.js
         };
     }
@@ -30,13 +32,23 @@ class Home extends React.Component{
         e.preventDefault();
         var photoFile = document.getElementById("input_img");
         var url_input = document.getElementById("img_url").value;
-       
+
         if(photoFile.files[0]!==undefined) {
-            this.file_api_call(photoFile)
+            
+            this.setState({btn_clicked_flag: 1});  // set btn_flag = 1
+            this.file_api_call(photoFile);
         }
-        else{
-            this.url_api_call(url_input)
+        else if(url_input !== ''){
+            
+            this.setState({btn_clicked_flag: 1});  // set btn_flag = 1
+            this.url_api_call(url_input);
+        } else {
+            // photoFile and url_input both are all empty -> pass
         }
+
+        // Input 입력값을 모두 초기화!
+        photoFile.files = null;
+        document.getElementById("img_url").value = null;
     }
 
     //file 처리
@@ -44,6 +56,7 @@ class Home extends React.Component{
         const api = axios.create({
             baseURL: 'http://localhost:5000'
         })
+
         var home_this = this;
         var formData = new FormData();
         formData.append("file", photoFile.files[0]);
@@ -56,6 +69,7 @@ class Home extends React.Component{
         }).then(function (response) {
             console.log(response);
             home_this.setState({
+                
                 page_change_flag:1,
                 response_data:response.data
             })
@@ -86,6 +100,8 @@ class Home extends React.Component{
           });
     }
     render(){
+        // When loading is complete, go to "Result.js"
+        let button;
         if(this.state.page_change_flag===1) {
             return <Redirect to={{
                 pathname: '/result',
@@ -94,6 +110,16 @@ class Home extends React.Component{
                 }
             }}></Redirect>
         }
+
+        // conditional rendering for Loading 
+        if(this.state.btn_clicked_flag===0) {
+            // not occured click event, set button normally
+            button = <input type="submit" value="UPLOAD"></input>;
+        } else {
+            // when clikc event occur, set button to React-bootstrap Loading Spinner
+            button = <Spinner animation="border" role="status"><span className="sr-only">Loading...</span></Spinner>; 
+        }
+        
         return (
         <div className="body_main">
             <form id="img_input_form" runat="server" action="" method="post" onSubmit={this.detectClick.bind(this)}>
@@ -104,13 +130,16 @@ class Home extends React.Component{
                 <input type="file" name="input_img" id="input_img" onChange={this.previewImg.bind(this)}></input>
                 <br></br>
                 <input type="textarea" name = "input_url" id="img_url"></input>
-                <input type="submit" value="UPLOAD"></input>
+                {button}
             </div>
-
             </form>
-        </div>
+        </div> 
         );
     }
 }
+
+// onChange 세분화, click event 처리 시, 해당 tag의 value도 모두 초기화 할 수 있도록 추가 구현.
+
+
 
 export default Home;

@@ -1,4 +1,5 @@
 import React from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css'; // For React-BootStrap default CSS ( 없으면 해당 strap 객체 렌더링 불가능 )
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import './App.css'
 import Home from './components/Home';
