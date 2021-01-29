@@ -34,12 +34,13 @@ from pytube.cli import on_progress
 import views
 
 video_id = 0
+video_filename = 0
 
 @app.route('/detect', methods=['POST'])
 def detect():
     global video_id
     Your_input = ''
-    video_filename = ''
+    global video_filename
 
     # TODO : check file posted normally ( Local video file )
     if request.form['image_type'] == "1" :
@@ -56,25 +57,28 @@ def detect():
 
         # if this url is youtube, use pytube module!
         Your_PyTube = pytube.YouTube(Your_input, on_progress_callback=on_progress)
-        video_filename = Your_PyTube.title
+        # video_filename = Your_PyTube.title
         
         # String 전처리
         #mylist = ['.', '`']
-        video_filename = video_filename.replace(".", "")
-        video_filename = video_filename.replace("'", "")
+        # video_filename = video_filename.replace(".", "")
+        # video_filename = video_filename.replace("'", "")
 
 
         # download youtube mp4 at our storage from youtube link
         temp_dir_path = './data/' 
         Your_PyTube.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first().download(temp_dir_path)
-        
+        video_filename = os.listdir(temp_dir_path)
+        video_filename.remove('.keep')
+        video_filename = video_filename[0]
+        video_filename = video_filename[0:-4]
 
         # set input url to local path located in youtube mp4 file
-        Your_input = temp_dir_path + video_filename + ".mp4"
-        gcp_control.upload_blob_filename('teamg_images',Your_input,video_filename)
-        os.remove(Your_input)
-        video_path = 'https://storage.googleapis.com/teamg_images/'+video_filename
-        views.video_insert('youtube',video_filename,video_path)
+        Your_input = temp_dir_path + video_filename
+        gcp_control.upload_blob_filename('teamg_images',Your_input+'.mp4',video_filename)
+        os.remove(Your_input+'.mp4')
+        video_path = gcp_control.generate_download_signed_url_v4('teamg_images', video_filename)
+        views.video_insert('youtube',video_filename,'https://storage.googleapis.com/teamg_images/'+video_filename)
 
     
 
@@ -92,9 +96,9 @@ def detect():
 
     for filename in list_dir:
         count += 1
-        location = video_path + '/' + filename
-        detect_result = kakao_api.detect_adult(video_path + '/' + filename, 0)
-        views.frame_insert(contents_id, location, filename, count*30000, detect_result)
+        # location = video_path + '/' + filename
+        detect_result = kakao_api.detect_adult('https://storage.googleapis.com/teamg_images/'+video_filename+'/'+filename, 0)
+        views.frame_insert(contents_id, 'https://storage.googleapis.com/teamg_images/'+video_filename, filename, count*30000, detect_result)
         #eta = datetime.utcnow() + timedelta(seconds=2)
         #tasks.async_Add.apply_async(args=[video_filename, video_path + '/' + filename, count*30,detect_result], kwargs={},eta=eta)
 
@@ -107,8 +111,7 @@ def detect():
     result['under'] = censored_zero / count
 
     # get Video Access URL from GCP storage
-    myURL = gcp_control.generate_download_signed_url_v4('teamg_images', video_filename)
-    result['video_URL'] = myURL
+    result['video_URL'] = video_path
     print(result)
     return {'result' : result }
 
@@ -119,25 +122,19 @@ def detect():
 @app.route('/readdb', methods=['POST'])
 def readdb():
     global video_id
-    print('--------------')
-    print(video_id)
+    global video_filename
     contents_analysis = views.frame_read(video_id)
 
     img_dict={}
-    img={}
     idx = 0
-
     for id, location, time_frame, ml_censored in contents_analysis:
+        img={}
         img['id'] = id
-        img['location'] = location
+        img['location'] = gcp_control.generate_download_signed_url_v4('teamg_images', video_filename + '/frm-' + str(idx) + '.jpg')
         img['time_frame'] = time_frame
         img['ml_censored'] = ml_censored
 
         img_dict[idx]=img
         idx += 1
 
-    print(img_dict)
-
     return {'img_dict' : img_dict }
-
-
