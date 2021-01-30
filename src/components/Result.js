@@ -9,7 +9,12 @@ class Result extends React.Component{
         super(props);
         this.state={
             response_data : this.props.location.state.response_data,
-            response_img_list : this.props.location.state.response_img_list
+            response_img_list : this.props.location.state.response_img_list,
+
+            // For video Player Values
+            playing: true,
+            seeking: true,
+            played: 0,
         }
       }
 
@@ -26,11 +31,42 @@ class Result extends React.Component{
     }
 
     make_Video(){
+        const { playing } = this.state
         const _Video_URL = this.state.response_data.result.video_URL;
         console.log(_Video_URL);
 
-        return  <ReactPlayer playing controls url = {_Video_URL} className='react-player' width="800px" height="800px"/>;
+        return  <ReactPlayer 
+        playing={playing}
+        ref = {this.ref}
+        controls
+        url = {_Video_URL}
+        className='react-player'
+        width="800px"
+        height="800px"/>;
     }
+
+    /*
+      // For Video Function //
+      -> 
+      ->
+      ->
+
+      */
+     handleSeekBtn = e => {
+        this.setState({ seeking: true })
+        this.setState( {played: parseFloat(e.target.value) })
+        this.setState({ playing: !this.state.playing })
+        this.player.seekTo(parseFloat(e.target.value))
+      }
+      
+      handleSeekChange = e => {
+        this.setState({ played: parseFloat(e.target.value) })
+      }
+      
+      
+      ref = player => {
+        this.player = player
+      }
     
     make_image_list(){
         console.log(this.state.response_img_list)
@@ -38,16 +74,29 @@ class Result extends React.Component{
     }
 
     render(){
-        console.log(this.state.response_data.result); 
-        console.log(this.state.response_data.result.over);
-        console.log(this.state.response_data.result.under);
-        console.log(this.state.response_data.result.video_URL);
+        
+        // Example of variable, 해당 구간을 의미하는 변수
+        const time = 0.63910701
+        
         return (
         <div className="result">
             <h2>Result</h2>
             <div className='player-wrapper' >{this.make_Video()}</div>
             {/*<svg width="200" height="200" viewBox="0 0 200 200" >{this.make_PieChart()}</svg>*/}
+            
+            <button 
+            value={time}
+            onClick={this.handleSeekBtn}></button>
+
+            <div>
+            <input
+            type='range' min={0} max={0.999999} step='any'
+            value={this.state.played}
+            onChange={this.handleSeekChange} />
+            </div>
+            
             {this.make_image_list()}
+            
         </div>
         );
     }
