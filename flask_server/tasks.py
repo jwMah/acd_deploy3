@@ -1,5 +1,4 @@
 import sqlalchemy
-import flask_celery
 from celery.signals import task_postrun
 from app import celery, db
 import models
@@ -12,9 +11,12 @@ def async_ReadMsg(self, img_type):
     db.session.commit()
 
 @celery.task(bind=True)
-def async_Add(self, video_name, imgdir, time, censored):
-    views.add(video_name, imgdir, time, censored)
+def async_video_insert(self, video_type, contents_name, location):
+    views.video_insert(video_type, contents_name, location)
 
+@celery.task(bind=True)
+def async_frame_insert(self, contents_id, location, file_name, time_frame, ml_censored):
+    views.frame_insert(contents_id, location, file_name, time_frame, ml_censored)
 
 @task_postrun.connect
 def close_session(*args, **kwargs):
