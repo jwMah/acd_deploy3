@@ -3,6 +3,7 @@ import React from 'react';
 import ReactPlayer from 'react-player'
 import { VictoryPie, VictoryTheme }from 'victory';
 import './main.css'
+import $ from 'jquery';
 
 class Result extends React.Component{
     constructor(props){
@@ -10,11 +11,11 @@ class Result extends React.Component{
         this.state={
             response_data : this.props.location.state.response_data,
             response_img_list : this.props.location.state.response_img_list,
-
             // For video Player Values
             playing: true,
             seeking: true,
             played: 0,
+            duration : 0
         }
       }
 
@@ -33,7 +34,7 @@ class Result extends React.Component{
     make_Video(){
         const { playing } = this.state
         const _Video_URL = this.state.response_data.result.video_URL;
-        console.log(_Video_URL);
+        //console.log(_Video_URL);
 
         return  <ReactPlayer 
         playing={playing}
@@ -42,35 +43,68 @@ class Result extends React.Component{
         url = {_Video_URL}
         className='react-player'
         width="800px"
-        height="800px"/>;
+        height="800px"
+        onDuration={this.handleDutation}/>;
     }
 
-    /*
-      // For Video Function //
-      -> 
-      ->
-      ->
+    handleDutation = (duration) =>{
+        console.log('onDuration',duration)
+        this.setState({duration})
+    }
+    handleSeekBtn = e => {
+        console.log(e.target)
+        const img_time = Number(e.target.getAttribute('value'))/1000;
+        const img_time_divided = img_time/this.state.duration
+        console.log(img_time)
 
-      */
-     handleSeekBtn = e => {
         this.setState({ seeking: true })
-        this.setState( {played: parseFloat(e.target.value) })
+        this.setState( {played: parseFloat(img_time_divided) })
         this.setState({ playing: !this.state.playing })
-        this.player.seekTo(parseFloat(e.target.value))
-      }
+        this.player.seekTo(parseFloat(img_time_divided))
+    }
       
-      handleSeekChange = e => {
+    handleSeekChange = e => {
         this.setState({ played: parseFloat(e.target.value) })
-      }
+    }
       
       
-      ref = player => {
+    ref = player => {
         this.player = player
-      }
+    }
+
     
     make_image_list(){
-        console.log(this.state.response_img_list)
-        return <Image_list response_img_list={this.state.response_img_list}></Image_list>
+        var img_lists = [];
+        var data = this.state.response_img_list.img_dict;
+        var i=0;
+        console.log(data)
+        while(i<Object.keys(data).length){
+            console.log(data[i].ml_censored)
+            img_lists.push(<div key={data[i].id} className='frame_prt_div'>
+                <div className='frame_chd_div' id={data[i].ml_censored}>
+                <img
+                id={data[i].id}
+                src={data[i].location}
+                alt='nope'
+                value={data[i].time_frame}
+                censored = {data[i].ml_censored}
+                onClick={this.handleSeekBtn}
+                ></img>
+                </div>
+                <select id='selectBox'>
+                    <option value="G" selected={data[i].ml_censored==="G"? true:false}>G</option>
+                    <option value="PG" selected={data[i].ml_censored==="PG"? true:false}>PG</option>
+                    <option value="R" selected={data[i].ml_censored==="R"? true:false}>R</option>
+                </select>
+                </div>)
+            //$("#selectBox").val("PG").prop("selected",true)
+            i=i+1;
+        }
+        return(
+            <div className="img_list">
+                {img_lists}
+            </div>
+        );
     }
 
     render(){
@@ -84,15 +118,12 @@ class Result extends React.Component{
             <div className='player-wrapper' >{this.make_Video()}</div>
             {/*<svg width="200" height="200" viewBox="0 0 200 200" >{this.make_PieChart()}</svg>*/}
             
-            <button 
-            value={time}
-            onClick={this.handleSeekBtn}></button>
-
             <div>
             <input
             type='range' min={0} max={0.999999} step='any'
             value={this.state.played}
-            onChange={this.handleSeekChange} />
+            onChange={this.handleSeekChange}
+            style={{display:'none'}}/>
             </div>
             
             {this.make_image_list()}
@@ -102,30 +133,5 @@ class Result extends React.Component{
     }
 }
 
-class Image_list extends React.Component{
-    constructor(props){
-        super(props);
-        this.state = {
-            response_img_list : this.props.response_img_list
-        }
-    }
-    render(){
-        var img_lists = [];
-        var data = this.state.response_img_list.img_dict;
-        var i=0;
-        console.log(typeof data)
-        while(i<Object.keys(data).length){
-            img_lists.push(<div>
-                <img id={data[i]} src={data[i].location} alt='nope'></img>
-                </div>)
-            i=i+1;
-        }
-        return(
-            <div className="img_list">
-                {img_lists}
-            </div>
-        );
-    }
-}
 
 export default Result;

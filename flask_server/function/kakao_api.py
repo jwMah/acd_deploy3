@@ -27,9 +27,11 @@ def detect_adult(image_url, image_type):
         resp.raise_for_status()
         result = resp.json()['result']
         if result['adult']>result['soft'] and result['adult']>result['normal']:
-            return "S"
-        else:
             return "R"
+        elif result['soft']>result['normal'] and result['soft']>result['adult']:
+            return "PG"
+        else:
+            return "G"
         #return ("Adult Percentage : {:3f}%  Soft Percentage : {:3f}%  Normal Percentage {:3f}%".format(result['adult'] * 100, result['soft'] * 100, result['normal'] * 100))
         
 
