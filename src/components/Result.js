@@ -1,9 +1,9 @@
 import { render } from '@testing-library/react';
+import {withRouter } from 'react-router-dom';
 import React from 'react';
 import ReactPlayer from 'react-player'
 import { VictoryPie, VictoryTheme }from 'victory';
-import './main.css'
-import $ from 'jquery';
+import './css/main.css'
 
 class Result extends React.Component{
     constructor(props){
@@ -83,6 +83,7 @@ class Result extends React.Component{
             img_lists.push(<div key={data[i].id} className='frame_prt_div'>
                 <div className='frame_chd_div' id={data[i].ml_censored}>
                 <img
+                className='frame_img'
                 id={data[i].id}
                 src={data[i].location}
                 alt='nope'
@@ -97,7 +98,6 @@ class Result extends React.Component{
                     <option value="R" selected={data[i].ml_censored==="R"? true:false}>R</option>
                 </select>
                 </div>)
-            //$("#selectBox").val("PG").prop("selected",true)
             i=i+1;
         }
         return(
@@ -108,10 +108,6 @@ class Result extends React.Component{
     }
 
     render(){
-        
-        // Example of variable, 해당 구간을 의미하는 변수
-        const time = 0.63910701
-        
         return (
         <div className="result">
             <h2>Result</h2>
@@ -134,4 +130,4 @@ class Result extends React.Component{
 }
 
 
-export default Result;
+export default withRouter(Result);
