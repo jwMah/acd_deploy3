@@ -1,5 +1,5 @@
 import React from 'react';
-import { Redirect, withRouter  } from 'react-router-dom';
+import { Redirect, withRouter } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import axios from 'axios';
 import {DropzoneArea} from 'material-ui-dropzone'
@@ -143,7 +143,7 @@ class Detect extends React.Component{
             // when clikc event occur, set button to React-bootstrap Loading Spinner
             button = <Spinner animation="border" role="status"><span className="sr-only">Loading...</span></Spinner>; 
         }
-        
+
         return (
         <div className="body_main">
             <form id="img_input_form" runat="server" action="" method="post" onSubmit={this.detectClick.bind(this)}>
@@ -157,6 +157,7 @@ class Detect extends React.Component{
                 {button}
             </div>
             </form>
+            <button name='redirect_btn' onClick={()=> this.props.history.push('/')}>Redirect!</button>
         </div> 
         );
     }
