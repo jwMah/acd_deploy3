@@ -13,7 +13,7 @@ from function import gcp_control
 
 
 config = configparser.ConfigParser()
-config.read('../config.ini')
+config.read('./config.ini')
 app = Flask(__name__)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
