@@ -17,7 +17,7 @@ def video_to_Img(file_path,video_filename):
     
     for filename in list_dir:
         # upload local image files to gcp storage
-        gcp_control.upload_blob_filename('teamg_images','data/' + filename, video_filename+'/'+filename)
+        gcp_control.upload_blob_filename('teamg-data','data/' + filename, video_filename+'/'+filename)
         # delete local image files
         os.remove('././data/' + filename)
     

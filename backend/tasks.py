@@ -18,9 +18,13 @@ def async_video_insert(self, video_type, contents_name, location):
 def async_frame_insert(self, contents_id, location, file_name, time_frame, ml_censored):
     views.frame_insert(contents_id, location, file_name, time_frame, ml_censored)
 
-@task_postrun.connect
-def close_session(*args, **kwargs):
-    db.session.remove()
+@celery.task(bind=True)
+def async_frame_update(self, frame_id, admin_censored):
+    views.frame_update(frame_id, admin_censored)
+
+# @task_postrun.connect
+# def close_session(*args, **kwargs):
+#     db.session.remove()
 
 
 

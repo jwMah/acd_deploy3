@@ -1,5 +1,5 @@
 import sys, os
-
+from sqlalchemy import sql
 os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 import models
 from app import app, db
@@ -20,3 +20,15 @@ def get_video_id(contents_name):
 
 def frame_read(video_id):
     return db.session.query(models.img_table.id,models.img_table.location,models.img_table.time_frame,models.img_table.ml_censored).filter(models.img_table.contents_id == video_id).all()
+
+def frame_update(frame_id, admin_censored):
+    temp = db.session.query(models.img_table).filter(models.img_table.id==frame_id).first()
+    temp.admin_censored = admin_censored
+    temp.update_time = sql.func.now()
+    db.session.commit()
+
+def frame_update(frame_id, admin_censored):
+    temp = db.session.query(models.img_table).filter(models.img_table.id==frame_id).first()
+    temp.admin_censored = admin_censored
+    temp.update_time = sql.func.now()
+    db.session.commit()
