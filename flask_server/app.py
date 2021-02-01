@@ -102,8 +102,8 @@ def detect():
     for filename in list_dir:
         count += 1
         # location = video_path + '/' + filename
-        detect_result = kakao_api.detect_adult(video_path+'/'+filename, 0)
-        views.frame_insert(int(video_id[0]), video_path +'/'+filename, filename, count*30000, detect_result)
+        detect_result = kakao_api.detect_adult(video_path+'/'+'frm-'+ str(count-1) +'.jpg', 0)
+        views.frame_insert(int(video_id[0]), video_path +'/'+'frm-'+ str(count-1)+'.jpg', 'frm-'+ str(count-1)+'.jpg', count*30000, detect_result)
         # eta = datetime.utcnow() + timedelta(seconds=2)
         # tasks.async_frame_insert.apply_async(args=[int(video_id[0]), video_path +'/'+filename, filename, count*30000, detect_result], kwargs={},eta=eta)
 
@@ -120,9 +120,9 @@ def detect():
     print(result)
     return {'result' : result }
 
-    
 
-    
+
+
 # read contents analysis from DB
 @app.route('/readdb', methods=['POST'])
 def readdb():
