@@ -13,6 +13,7 @@
     "bootstrap": "^4.6.0",
     "cors": "^2.8.5",
     "jquery": "^3.5.1",
+    "material-ui-dropzone": "^3.5.0",
     "react": "^16.13.1",
     "react-bootstrap": "^1.4.3",
     "react-dom": "^16.13.1",

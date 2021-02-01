@@ -28,8 +28,12 @@ class Home extends React.Component{
             <p>
             'Adult Contents Detector' is a Web Application that can detect harmful contents that contains exposure.<br></br>
             <br></br>
-            The CNN AI model determines the exposure level for video in the form of local files or URLs that you enter. When the discrimination is complete, the results are visually displayed, and the user can change the detection result.<br></br>
-            In addition, the application allows you to view all detected frames a quantitative manner.<br></br>
+            - the MPAA-based 'R' class is "Restricted". only adults can watch it. It contains adult materials.<br></br>
+            - the MPAA-based 'PG' class contains some materials that may not be suitable for children.<br></br>
+            - the MPAA-based 'G' class is "G-RATED MOVIE". All ages acknowledged.<br></br>
+            <br></br>
+            When the discrimination is complete, the results are visually displayed, and the user can change the detection result.<br></br>
+            In addition, you can make a direct correction if the result of the discrimination against the frame is ambiguous.<br></br>
             </p>
             <Button boxShadow={3} id='start_button' variant="contained" component={Link} to={'/detect'}>START</Button>
         </div>
