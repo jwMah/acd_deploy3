@@ -13,6 +13,10 @@ h1{
     width: 20%;
     font-size: 30px;
     font-family: 'M PLUS 1p', sans-serif;
+    color : silver;
     font-weight: bold;
     box-Shadow: '0 0 0 0.2rem rgba(0,123,255,.5)',
+}
+#start_button:hover{
+    color : rgb(46, 59, 85);
 }

@@ -28,7 +28,8 @@ class Home extends React.Component{
             <p>
             'Adult Contents Detector' is a Web Application that can detect harmful contents that contains exposure.<br></br>
             <br></br>
-            The CNN AI model determines the exposure level for video in the form of local files or URLs that you enter. When the discrimination is complete, the results are visually displayed, and the user can change the detection result.<br></br>
+            The CNN AI model determines the exposure level for video in the form of local files or URLs that you enter.<br></br> 
+            When the discrimination is complete, the results are visually displayed, and the user can change the detection result.<br></br>
             In addition, the application allows you to view all detected frames a quantitative manner.<br></br>
             </p>
             <Button boxShadow={3} id='start_button' variant="contained" component={Link} to={'/detect'}>START</Button>
