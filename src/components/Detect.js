@@ -2,6 +2,7 @@ import React from 'react';
 import { Redirect, withRouter  } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import axios from 'axios';
+import {DropzoneArea} from 'material-ui-dropzone'
 
 class Detect extends React.Component{
     constructor(props) {
@@ -59,7 +60,7 @@ class Detect extends React.Component{
             baseURL: 'http://localhost:5000'
         })
         
-        api.post('/readdb')
+        api.post('/frame')
         .then(function (response) {
             console.log(response.data);
             detect_this.setState({
@@ -120,6 +121,7 @@ class Detect extends React.Component{
             console.log(error);
           });
     }
+
     render(){
         // When loading is complete, go to "Result.js"
         let button;

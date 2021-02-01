@@ -2,7 +2,6 @@ import { render } from '@testing-library/react';
 import {withRouter } from 'react-router-dom';
 import React from 'react';
 import ReactPlayer from 'react-player'
-import { VictoryPie, VictoryTheme }from 'victory';
 import './css/main.css'
 
 class Result extends React.Component{
@@ -18,18 +17,6 @@ class Result extends React.Component{
             duration : 0
         }
       }
-
-    make_PieChart(){
-        const _Over = this.state.response_data.result.over;
-        const _Under = this.state.response_data.result.under;
-        const My_data = [{x:'over', y:_Over}, {x:'under', y:_Under}];
-
-        return <VictoryPie
-        standalone={false} 
-        width={400} height={400}
-        colorScale={["red", "green"]}
-        data={My_data}></VictoryPie>;
-    }
 
     make_Video(){
         const { playing } = this.state

@@ -124,7 +124,7 @@ def detect():
 
 
 # read contents analysis from DB
-@app.route('/readdb', methods=['POST'])
+@app.route('/frame', methods=['POST'])
 def readdb():
     global video_id
     global video_filename
