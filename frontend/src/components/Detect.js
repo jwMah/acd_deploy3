@@ -2,6 +2,8 @@ import React from 'react';
 import { Redirect, withRouter  } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import axios from 'axios';
+import ProgressBar from './ProgressBar.js';
+
 
 const api = axios.create({
     baseURL: 'http://localhost:5000'
@@ -15,7 +17,8 @@ class Detect extends React.Component{
             btn_clicked_flag : 0,           //detectClick && -> flag = 1 
             response_data : "",              //back -> response -> result.js
             response_img_list : [],
-            response_status : "before uploading"
+            response_status : "",
+            response_status_num : 0
         };
     }
 
@@ -39,6 +42,10 @@ class Detect extends React.Component{
         var photoFile = document.getElementById("input_img");
         var url_input = document.getElementById("img_url").value;
         var flag = 0;
+        const detect_click_this = this;
+        detect_click_this.setState({
+            response_status_num : 10
+        })
         if(photoFile.files[0]!==undefined) {
             this.setState({btn_clicked_flag: 1});  // set btn_flag = 1
             flag = this.file_api_call(photoFile);
@@ -59,8 +66,6 @@ class Detect extends React.Component{
 
     //file 처리
     file_api_call(photoFile){
-        
-
         var home_this = this;
         var formData = new FormData();
         formData.append("file", photoFile.files[0]);
@@ -74,7 +79,8 @@ class Detect extends React.Component{
             console.log(response);
             const status_sentence = response.data.video_filename+"is uploaded"
             home_this.setState({
-                response_status : status_sentence
+                response_status : status_sentence,
+                response_status_num : 40
             })
             return home_this.frame_uploading();
         }).catch(function (error) {
@@ -94,9 +100,10 @@ class Detect extends React.Component{
         api.post('/videoUploading', formData)
           .then(function (response) {
             console.log(response);
-            const status_sentence = home_this.state.response_status+ "<br></br>"+response.data.video_filename+" is uploaded"+" <br></br> Frames are extracting......"
+            const status_sentence = response.data.video_filename+"is uploaded"
             home_this.setState({
-                response_status : status_sentence
+                response_status : status_sentence,
+                response_status_num : 40
             })
             return home_this.frame_uploading();
             //보류 home_this.make_img_list()
@@ -114,10 +121,10 @@ class Detect extends React.Component{
         api.post('/frameUploading')
           .then(function (response) {
             console.log(response);
-            const status_sentence = home_this.state.response_status + "<br></br>"+response.data.result.frame_counts + " frames are extracted from " + response.data.result.video_filename;
+            const status_sentence = home_this.state.response_status + <br></br> +response.data.result.frame_counts + " frames are extracted from " + response.data.result.video_filename;
             home_this.setState({
                 response_status : status_sentence,
-                //response_data:response.data
+                response_status_num : 60
             })
             return setTimeout(function() {
                 home_this.final_detect();
@@ -137,10 +144,11 @@ class Detect extends React.Component{
         api.post('/detectFinal')
           .then(function (response) {
             console.log(response);
-            const status_sentence = home_this.state.response_status+ "<br></br>"+"detecting...."
+            const status_sentence = home_this.state.response_status + <br></br> + "detecting...."
             home_this.setState({
                 response_status : status_sentence,
-                response_data:response.data
+                response_data:response.data,
+                response_status_num : 90
             })
             return setTimeout(function() {
                 home_this.make_img_list();
@@ -163,7 +171,8 @@ class Detect extends React.Component{
             console.log(response.data);
             detect_this.setState({
                 page_change_flag:1,
-                response_img_list:response.data
+                response_img_list:response.data,
+                response_status_num : 100
             })
         }).catch(function (error) {
             console.log(error);
@@ -204,9 +213,11 @@ class Detect extends React.Component{
                 <input type="textarea" name = "input_url" id="img_url"></input>
                 {button}
             </div>
+            <br></br>
             <button name='redirect_btn' onClick={()=> this.props.history.push('/')}>Redirect!</button>
             <br></br>
             <h2>{this.state.response_status}</h2>
+            <ProgressBar response_status_num={this.state.response_status_num}></ProgressBar>
             </form>
         </div> 
         );
