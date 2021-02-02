@@ -191,22 +191,21 @@ def readdb():
 @app.route('/update', methods=['POST'])
 def update():
     changed_lists = request.get_json(force=True)
-    print(changed_lists)
-    '''
+
     count = 0
     for changed_img in changed_lists:
-        eta = datetime.utcnow() + timedelta(seconds=2)
-        tasks.async_frame_update.apply_async(args=[changed_img['id'], changed_img['censored']], kwargs={},eta=eta)
+        if changed_img['id'] == 0:
+            if changed_img['censored'] == '19세 이용가':
+                censored = 'R'
+            elif changed_img['censored'] == '15세 이용가':
+                censored = 'PG'
+            else:
+                censored = 'G'
+            eta = datetime.utcnow() + timedelta(seconds=2)
+            tasks.async_video_update.apply_async(args=[video_id[0], censored], kwargs={},eta=eta)
+        else:
+            eta = datetime.utcnow() + timedelta(seconds=2)
+            tasks.async_frame_update.apply_async(args=[changed_img['id'], changed_img['censored']], kwargs={},eta=eta)
+        
         count = count+1
-    '''
     return {'changed_count' : count}
-
-#db 영상 결과 반영
-@app.route('/save', methods=['POST'])
-def save():
-    changed_result = request.get_json(force=True)
-    print(changed_result)
-    
-    #eta = datetime.utcnow() + timedelta(seconds=2)
-    #tasks.async_video_update.apply_async(args=[video_id, changed_result['video_censored']], kwargs={},eta=eta)
-    return {'updated_result' : 'success'}
