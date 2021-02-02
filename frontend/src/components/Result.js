@@ -180,6 +180,7 @@ class Result extends React.Component{
     }
 
     make_Result(){
+        
         let data = this.state.response_img_list.img_dict;
         
         let i=0;
@@ -206,9 +207,13 @@ class Result extends React.Component{
         const Res_PG = censored_PG / length_t * 100;
         const Res_G = censored_PG / length_t * 100;
 
+        const api = axios.create({
+            baseURL: 'http://localhost:5000'
+        })
+
         if(Res_R === 0.0 && Res_PG <= 20.0){
             
-        send_changed_censored = {'video_censored' : 'G'};
+        const send_changed_censored = {'video_censored' : 'G'};
         api.post('/save', send_changed_censored)
           .then(function (response) {
             console.log(response);
@@ -221,7 +226,7 @@ class Result extends React.Component{
             );
         } else if(Res_R <= 20.0) {
 
-        send_changed_censored = {'video_censored' : 'PG'};
+        const send_changed_censored = {'video_censored' : 'PG'};
         api.post('/save', send_changed_censored)
           .then(function (response) {
             console.log(response);
@@ -234,7 +239,7 @@ class Result extends React.Component{
                 );
         } else {
 
-        send_changed_censored = {'video_censored' : 'R'};
+        const send_changed_censored = {'video_censored' : 'R'};
         api.post('/save', send_changed_censored)
           .then(function (response) {
             console.log(response);
