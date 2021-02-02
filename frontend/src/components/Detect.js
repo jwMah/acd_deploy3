@@ -204,6 +204,7 @@ class Detect extends React.Component{
                 <input type="textarea" name = "input_url" id="img_url"></input>
                 {button}
             </div>
+            <button name='redirect_btn' onClick={()=> this.props.history.push('/')}>Redirect!</button>
             <br></br>
             <h2>{this.state.response_status}</h2>
             </form>

@@ -135,6 +135,7 @@ class Result extends React.Component{
     render(){
         return (
         <div className="result">
+        <button name='redirect_btn' onClick={()=> this.props.history.push('/')}>Redirect!</button>
             <Grid container spacing={1} item align="center" justify="center">
                 <Grid className='MuiGrid-align-items-xs-center' xs={12} sm={7}><div className='player-wrapper'>{this.make_Video()}</div></Grid>
                 <Grid className='MuiGrid-align-items-xs-center' item justify="center" align="center" xs={12} sm={5}>
