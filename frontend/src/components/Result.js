@@ -16,7 +16,7 @@ class Result extends React.Component{
             response_data : this.props.location.state.response_data,
             response_img_list : this.props.location.state.response_img_list,
             changed_img_list : [],
-            // For video Player Values
+            // For video Player state
             playing: true,
             seeking: true,
             played: 0,
