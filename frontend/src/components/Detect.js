@@ -3,6 +3,10 @@ import { Redirect, withRouter  } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import axios from 'axios';
 
+const api = axios.create({
+    baseURL: 'http://localhost:5000'
+})
+
 class Detect extends React.Component{
     constructor(props) {
         super(props);
@@ -10,7 +14,8 @@ class Detect extends React.Component{
             page_change_flag : 0,           //button -> result
             btn_clicked_flag : 0,           //detectClick && -> flag = 1 
             response_data : "",              //back -> response -> result.js
-            response_img_list : []
+            response_img_list : [],
+            response_status : "before uploading"
         };
     }
 
@@ -52,6 +57,100 @@ class Detect extends React.Component{
         
     }
 
+    //file 처리
+    file_api_call(photoFile){
+        
+
+        var home_this = this;
+        var formData = new FormData();
+        formData.append("file", photoFile.files[0]);
+        formData.append("image_type", "1");
+
+        api.post('/videoUploading', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        }).then(function (response) {
+            console.log(response);
+            const status_sentence = response.data.video_filename+"is uploaded"
+            home_this.setState({
+                response_status : status_sentence
+            })
+            return home_this.frame_uploading();
+        }).catch(function (error) {
+            console.log(error);
+        });
+    }
+
+    url_api_call(url_input){
+        const api = axios.create({
+            baseURL: 'http://localhost:5000'
+        })
+        var home_this = this;
+        var formData = new FormData();
+        formData.append("image_url", url_input);
+        formData.append("image_type", "0");
+        
+        api.post('/videoUploading', formData)
+          .then(function (response) {
+            console.log(response);
+            const status_sentence = home_this.state.response_status+ "<br></br>"+response.data.video_filename+" is uploaded"+" <br></br> Frames are extracting......"
+            home_this.setState({
+                response_status : status_sentence
+            })
+            return home_this.frame_uploading();
+            //보류 home_this.make_img_list()
+            //보류 return 1;
+        }).catch(function (error) {
+            console.log(error);
+          });
+    }
+
+    frame_uploading(){
+        const api = axios.create({
+            baseURL: 'http://localhost:5000'
+        })
+        var home_this = this;
+        api.post('/frameUploading')
+          .then(function (response) {
+            console.log(response);
+            const status_sentence = home_this.state.response_status + "<br></br>"+response.data.result.frame_counts + " frames are extracted from " + response.data.result.video_filename;
+            home_this.setState({
+                response_status : status_sentence,
+                //response_data:response.data
+            })
+            return setTimeout(function() {
+                home_this.final_detect();
+                return 1;
+            }, 5000);
+        }).catch(function (error) {
+            console.log(error);
+          });
+    }
+
+    //request detecting
+    final_detect(){
+        const api = axios.create({
+            baseURL: 'http://localhost:5000'
+        })
+        var home_this = this;
+        api.post('/detectFinal')
+          .then(function (response) {
+            console.log(response);
+            const status_sentence = home_this.state.response_status+ "<br></br>"+"detecting...."
+            home_this.setState({
+                response_status : status_sentence,
+                response_data:response.data
+            })
+            return setTimeout(function() {
+                home_this.make_img_list();
+                return 1;
+            }, 5000);
+        }).catch(function (error) {
+            console.log(error);
+        });
+    }
+
     make_img_list(){
         var detect_this = this;
 
@@ -69,56 +168,6 @@ class Detect extends React.Component{
         }).catch(function (error) {
             console.log(error);
         });
-    }
-
-    //file 처리
-    file_api_call(photoFile){
-        const api = axios.create({
-            baseURL: 'http://localhost:5000'
-        })
-
-        var home_this = this;
-        var formData = new FormData();
-        formData.append("file", photoFile.files[0]);
-        formData.append("image_type", "1");
-
-        api.post('/detect', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        }).then(function (response) {
-            console.log(response);
-            home_this.setState({
-                response_data:response.data
-            })
-            home_this.make_img_list()
-            return 1;
-        }).catch(function (error) {
-            console.log(error);
-        });
-    }
-
-    url_api_call(url_input){
-        
-        const api = axios.create({
-            baseURL: 'http://localhost:5000'
-        })
-        var home_this = this;
-        var formData = new FormData();
-        formData.append("image_url", url_input);
-        formData.append("image_type", "0");
-        
-        api.post('/detect', formData)
-          .then(function (response) {
-            console.log(response);
-            home_this.setState({
-                response_data:response.data
-          })
-          home_this.make_img_list()
-          return 1;
-        }).catch(function (error) {
-            console.log(error);
-          });
     }
 
     render(){
@@ -155,6 +204,8 @@ class Detect extends React.Component{
                 <input type="textarea" name = "input_url" id="img_url"></input>
                 {button}
             </div>
+            <br></br>
+            <h2>{this.state.response_status}</h2>
             </form>
         </div> 
         );
