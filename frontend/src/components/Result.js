@@ -17,6 +17,7 @@ class Result extends React.Component{
             response_data : this.props.location.state.response_data,
             response_img_list : this.props.location.state.response_img_list,
             changed_img_list : [],
+
             // For video Player state
             playing: true,
             seeking: true,
@@ -86,6 +87,7 @@ class Result extends React.Component{
             baseURL: 'http://localhost:5000'
         })
         var send_changed_censored = this.state.changed_img_list
+        // 마찬가지로 바뀐 video_censored 넣어서 보내야 함!
         api.post('/update', send_changed_censored)
           .then(function (response) {
             console.log(response);
@@ -205,14 +207,41 @@ class Result extends React.Component{
         const Res_G = censored_PG / length_t * 100;
 
         if(Res_R === 0.0 && Res_PG <= 20.0){
+            
+        send_changed_censored = {'video_censored' : 'G'};
+        api.post('/save', send_changed_censored)
+          .then(function (response) {
+            console.log(response);
+        }).catch(function (error) {
+            console.log(error);
+        });
+
             return(
                 <p>이 비디오는 전체이용가 입니다.</p>
             );
         } else if(Res_R <= 20.0) {
+
+        send_changed_censored = {'video_censored' : 'PG'};
+        api.post('/save', send_changed_censored)
+          .then(function (response) {
+            console.log(response);
+        }).catch(function (error) {
+            console.log(error);
+        });
+
             return(
                 <p>이 비디오는 15세 이용가 입니다.</p>
                 );
         } else {
+
+        send_changed_censored = {'video_censored' : 'R'};
+        api.post('/save', send_changed_censored)
+          .then(function (response) {
+            console.log(response);
+        }).catch(function (error) {
+            console.log(error);
+        });
+
             return(
                 <p>이 비디오는 19세 이용가 입니다.</p>
                 );
