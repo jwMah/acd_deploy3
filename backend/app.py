@@ -270,12 +270,13 @@ def readdb():
 
 @app.route('/update', methods=['POST'])
 def update():
-    requestJson = request.get_json(force=True)
-    print(requestJson)
+    changed_lists = request.get_json(force=True)
+    print(changed_lists)
     # list = [{'id':'1', 'censored':'PG'},{'id':'2', 'censored':'R'}]
     #list = request.form.getlist('list')
-    '''
-    for dict in list:
+    count = 0
+    for changed_img in changed_lists:
         eta = datetime.utcnow() + timedelta(seconds=2)
-        tasks.async_frame_update.apply_async(args=[int(dict['id']), dict['censored']], kwargs={},eta=eta)
-    '''
+        tasks.async_frame_update.apply_async(args=[changed_img['id'], changed_img['censored']], kwargs={},eta=eta)
+        count = count+1
+    return {'changed_count' : count}
