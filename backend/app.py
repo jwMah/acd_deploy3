@@ -61,8 +61,8 @@ def videoUploading():
         os.remove('./data/'+video_filename)
         video_type = 'local'
         # views.video_insert('local',video_filename,video_path)
-        # eta = datetime.utcnow() + timedelta(seconds=2)
-        # tasks.async_video_insert.apply_async(args=['local',video_filename,video_path], kwargs={},eta=eta)
+        eta = datetime.utcnow() + timedelta(seconds=2)
+        tasks.async_video_insert.apply_async(args=['local',video_filename,video_path], kwargs={},eta=eta)
 
     # check URL posted normally ( Youtube or other video service )
     elif request.form['image_type'] == "0" :
@@ -105,7 +105,7 @@ def frameUploading():
     global video_filename
     global video_path
     # ( 공통 process ) upload frames to gcp storage
-    list_dir = ffmpeg.video_to_Img(video_path,video_filename)
+    list_dir = ffmpeg.video_to_Img(video_path_signed,video_filename)
     # video filename, frame 갯수
     result = {}
     result['video_filename'] = video_filename
@@ -153,18 +153,13 @@ def detectFinal():
         censored = 'R'
     result['censored'] = censored
 
-    #eta = datetime.utcnow() + timedelta(seconds=2)
-    #tasks.async_video_insert.apply_async(args=[video_type,video_filename, video_path], kwargs={},eta=eta)
+    eta = datetime.utcnow() + timedelta(seconds=2)
+    tasks.async_video_censored.apply_async(args=[int(video_id[0]), censored], kwargs={},eta=eta)
 
     # get Video Access URL from GCP storage
     result['video_URL'] = video_path_signed
     print(result)
 
-    # list = {'852' : 'PG', '853' : 'R'}
-    # dict_keys = list.keys()
-    # for key in dict_keys:
-    #     eta = datetime.utcnow() + timedelta(seconds=2)
-    #     tasks.async_frame_update.apply_async(args=[int(key), list[key]], kwargs={},eta=eta)
 
     return {'result' : result }
 
@@ -196,11 +191,19 @@ def readdb():
 def update():
     changed_lists = request.get_json(force=True)
     print(changed_lists)
-    # list = [{'id':'1', 'censored':'PG'},{'id':'2', 'censored':'R'}]
-    #list = request.form.getlist('list')
     count = 0
     for changed_img in changed_lists:
         eta = datetime.utcnow() + timedelta(seconds=2)
         tasks.async_frame_update.apply_async(args=[changed_img['id'], changed_img['censored']], kwargs={},eta=eta)
         count = count+1
     return {'changed_count' : count}
+
+
+@app.route('/save', methods=['POST'])
+def save():
+    changed_result = request.get_json(force=True)
+    print(changed_result)
+    
+    eta = datetime.utcnow() + timedelta(seconds=2)
+    tasks.async_video_update.apply_async(args=[video_id, changed_result['video_censored']], kwargs={},eta=eta)
+    return {'updated_result' : 'success'}
