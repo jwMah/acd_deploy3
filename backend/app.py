@@ -187,23 +187,26 @@ def readdb():
 
     return {'img_dict' : img_dict }
 
+#바뀐 frame censored와 video censored 업데이트 request 처리
 @app.route('/update', methods=['POST'])
 def update():
     changed_lists = request.get_json(force=True)
     print(changed_lists)
+    '''
     count = 0
     for changed_img in changed_lists:
         eta = datetime.utcnow() + timedelta(seconds=2)
         tasks.async_frame_update.apply_async(args=[changed_img['id'], changed_img['censored']], kwargs={},eta=eta)
         count = count+1
+    '''
     return {'changed_count' : count}
 
-
+#db 영상 결과 반영
 @app.route('/save', methods=['POST'])
 def save():
     changed_result = request.get_json(force=True)
     print(changed_result)
     
-    eta = datetime.utcnow() + timedelta(seconds=2)
-    tasks.async_video_update.apply_async(args=[video_id, changed_result['video_censored']], kwargs={},eta=eta)
+    #eta = datetime.utcnow() + timedelta(seconds=2)
+    #tasks.async_video_update.apply_async(args=[video_id, changed_result['video_censored']], kwargs={},eta=eta)
     return {'updated_result' : 'success'}
