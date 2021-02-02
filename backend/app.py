@@ -35,19 +35,12 @@ import views
 
 video_id = 0
 video_filename = 0
-video_path= 0
-video_path_signed = 0
-video_type = 0
-list_dir = 0
 
-@app.route('/videoUploading', methods=['POST'])
-def videoUploading():
+@app.route('/detect', methods=['POST'])
+def detect():
     global video_id
     Your_input = ''
     global video_filename
-    global video_path
-    global video_path_signed
-    global video_type
 
     # TODO : check file posted normally ( Local video file )
     if request.form['image_type'] == "1" :
@@ -56,12 +49,11 @@ def videoUploading():
         Your_input.save(os.path.join('./data/',video_filename))
         gcp_control.upload_blob_filename('teamg-data','./data/'+video_filename,video_filename)
         video_path = 'https://storage.googleapis.com/teamg-data/'+video_filename
-        video_path_signed = gcp_control.generate_download_signed_url_v4('teamg-data', video_filename)
         os.remove('./data/'+video_filename)
-        video_type = 'local'
+        video_path_signed = video_path
         # views.video_insert('local',video_filename,video_path)
-        # eta = datetime.utcnow() + timedelta(seconds=2)
-        # tasks.async_video_insert.apply_async(args=['local',video_filename,video_path], kwargs={},eta=eta)
+        eta = datetime.utcnow() + timedelta(seconds=2)
+        tasks.async_video_insert.apply_async(args=['local',video_filename,video_path], kwargs={},eta=eta)
 
     # check URL posted normally ( Youtube or other video service )
     elif request.form['image_type'] == "0" :
@@ -90,71 +82,44 @@ def videoUploading():
         video_path = 'https://storage.googleapis.com/teamg-data/'+video_filename
         # get signed url of video from google storage
         video_path_signed = gcp_control.generate_download_signed_url_v4('teamg-data', video_filename)
-        # eta = datetime.utcnow() + timedelta(seconds=2)
-        # tasks.async_video_insert.apply_async(args=['youtube',video_filename, video_path], kwargs={},eta=eta)
+        eta = datetime.utcnow() + timedelta(seconds=2)
+        tasks.async_video_insert.apply_async(args=['youtube',video_filename, video_path], kwargs={},eta=eta)
         # views.video_insert('youtube',video_filename,'https://storage.googleapis.com/teamg_images/'+video_filename)
-        video_type = 'youtube'
 
-    return {'video_filename' : video_filename }
+    
 
-
-@app.route('/frameUploading', methods=['POST'])
-def frameUploading():
-    global list_dir
     # ( 공통 process ) upload frames to gcp storage
-    list_dir = ffmpeg.video_to_Img(video_path,video_filename)
-    # video filename, frame 갯수
-    return {'video_filename' : video_filename }
+    list_dir = ffmpeg.video_to_Img(video_path_signed,video_filename)
 
-
-@app.route('/detectFinal', methods=['POST'])
-def detectFinal(): 
-    # insert contents analysis to DB
+    # insert contents analysis to DB            
     result = {}
     count=0
-    censored_G = 0
-    censored_PG = 0
-    censored_R = 0
+    censored_zero = 0
+    censored_one = 0
     
     video_id = views.get_video_id(video_filename)
 
     for filename in list_dir:
         count += 1
+        # location = video_path + '/' + filename
         detect_result = kakao_api.detect_adult(video_path+'/'+'frm-'+ str(count-1) +'.jpg', 0)
         views.frame_insert(int(video_id[0]), video_path +'/'+'frm-'+ str(count-1)+'.jpg', 'frm-'+ str(count-1)+'.jpg', count*30000-15000, detect_result)
+        # eta = datetime.utcnow() + timedelta(seconds=2)
+        # tasks.async_frame_insert.apply_async(args=[int(video_id[0]), video_path +'/'+filename, filename, count*30000, detect_result], kwargs={},eta=eta)
 
-        if detect_result == 'G':
-            censored_G += 1
-        elif detect_result == 'PG':
-            censored_PG += 1
+        if detect_result == 0:
+            censored_zero += 1
         else:
-            censored_R +=1
+            censored_one += 1
 
-    pct_PG = censored_PG / count
-    pct_R = censored_R / count
-    if pct_R==0 and pct_PG <= 0.2:
-        censored = 'G'
-    elif pct_R <= 0.2:
-        censored = 'PG'
-    else:
-        censored = 'R'
-    result['censored'] = censored
-
-    eta = datetime.utcnow() + timedelta(seconds=2)
-    tasks.async_video_insert.apply_async(args=[video_type,video_filename, video_path], kwargs={},eta=eta)
+    result['over'] = censored_one / count
+    result['under'] = censored_zero / count
 
     # get Video Access URL from GCP storage
     result['video_URL'] = video_path_signed
     print(result)
-
-
-    # list = {'852' : 'PG', '853' : 'R'}
-    # dict_keys = list.keys()
-    # for key in dict_keys:
-    #     eta = datetime.utcnow() + timedelta(seconds=2)
-    #     tasks.async_frame_update.apply_async(args=[int(key), list[key]], kwargs={},eta=eta)
-
     return {'result' : result }
+
 
 
 
@@ -178,14 +143,3 @@ def readdb():
         idx += 1
 
     return {'img_dict' : img_dict }
-
-
-# update DB contents_analysis ml_censored
-@app.route('/update', methods=['POST'])
-def update():
-    # list = {'852' : 'PG', '853' : 'R'}
-    request.form.getlist('list')
-    dict_keys = list.keys()
-    for key in dict_keys:
-        eta = datetime.utcnow() + timedelta(seconds=2)
-        tasks.async_frame_update.apply_async(args=[int(key), list[key]], kwargs={},eta=eta)
