@@ -27,3 +27,14 @@ def frame_update(frame_id, admin_censored):
     temp.admin_censored = admin_censored
     temp.update_time = sql.func.now()
     db.session.commit()
+
+def video_censored(video_id, censored):
+    temp = db.session.query(models.video_table).filter(models.video_table.id==video_id).first()
+    temp.censored = censored
+    db.session.commit()
+
+def video_update(video_id, censored):
+    temp = db.session.query(models.video_table).filter(models.video_table.id==video_id).first()
+    temp.censored = censored
+    temp.update_time = sql.func.now()
+    db.session.commit()
