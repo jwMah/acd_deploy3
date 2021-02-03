@@ -23,7 +23,7 @@ CORS(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = config['DEFAULT']['SQLALCHEMY_DATABASE_URI']
 # 추가하지 않을 시 FSADeprecationWarning 주의가 떠서 추가해 줌
-#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 api = Blueprint('api',__name__)
 
@@ -37,11 +37,11 @@ from pytube.cli import on_progress
 import views
 
 video_id = 0
-video_filename = 0
-video_path= 0
-video_path_signed = 0
-video_type = 0
-list_dir = 0
+video_filename = ''
+video_path= ''
+video_path_signed = ''
+video_type = ''
+list_dir = []
 
     
 @api.route('/videoUploading', methods=['POST'])
@@ -98,6 +98,7 @@ def videoUploading():
         tasks.async_video_insert.apply_async(args=['youtube',video_filename, video_path], kwargs={},eta=eta)
         # views.video_insert('youtube',video_filename,'https://storage.googleapis.com/teamg-data/'+video_filename)
         video_type = 'youtube'
+        print(video_path_signed)
 
     return {'video_filename' : video_filename }
 
@@ -107,6 +108,8 @@ def frameUploading():
     global list_dir
     global video_filename
     global video_path
+    global video_path_signed
+    
     # ( 공통 process ) upload frames to gcp storage
     list_dir = ffmpeg.video_to_Img(video_path_signed,video_filename)
     # video filename, frame 갯수
@@ -215,3 +218,4 @@ def update():
 
 
 app.register_blueprint(api, url_prefix='/api')
+

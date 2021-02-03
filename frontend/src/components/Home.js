@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { Link , withRouter } from 'react-router-dom';
-import './css/home.css'
+import '../home.css'
 import Button from '@material-ui/core/Button'
 
 

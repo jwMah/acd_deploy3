@@ -2,7 +2,7 @@ import { render } from '@testing-library/react';
 import {withRouter } from 'react-router-dom';
 import React from 'react';
 import ReactPlayer from 'react-player'
-import './css/result.css'
+import '../result.css'
 import Hor_bar_chart from './Hor_bar_chart'
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button'

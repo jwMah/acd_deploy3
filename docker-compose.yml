@@ -1,20 +1,61 @@
+# version: "3"
+# services:
+#   frontend:
+#     container_name: frontend
+#     build:
+#       context: ./frontend
+#       dockerfile: Dockerfile
+#     ports:
+#       - 80:80
+#       - 443:443
+#     volumes:
+#       - /home/ubuntu/ssl:/etc/nginx/certs
+
+#   backend:
+#     restart: always
+#     container_name: backend
+#     build: ./backend
+#     expose:
+#       - 5000
+#     volumes:
+#       - ./backend:/usr/src/app
+#     environment:
+#       - GOOGLE_APPLICATION_CREDENTIALS=/usr/src/app/my-key.json
+#       - FLASK_ENV=development
+#       #- FLASK_APP=app.py
+#       - FLASK_DEBUG=1
+
+#   rabbitmq:
+#     image: rabbitmq:latest
+#     ports: 
+#       - 5672:5672
+#       - 15672:15672
+  
+#   celery:
+#     build:
+#       context: ./backend
+#       dockerfile: Dockerfile
+#     hostname: celery
+#     entrypoint: celery
+#     command: -A app.celery worker --loglevel=info
+#     volumes:
+#       - ./backend:/usr/src/app
+
 version: "3"
 services:
   frontend:
     container_name: frontend
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - /home/ubuntu/ssl:/etc/nginx/certs
+      - 9090:80
 
   backend:
-    restart: always
     container_name: backend
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
     expose:
       - 5000
     volumes:
@@ -26,9 +67,17 @@ services:
       - FLASK_DEBUG=1
 
   rabbitmq:
-    image: rabbitmq:latest
+    image: rabbitmq:3-management
     ports: 
       - 5672:5672
       - 15672:15672
-    
-    
+  
+  celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    hostname: celery
+    entrypoint: celery
+    command: -A app.celery worker --loglevel=info
+    volumes:
+      - ./backend:/usr/src/app
