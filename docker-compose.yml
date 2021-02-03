@@ -1,0 +1,34 @@
+version: "3"
+services:
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /home/ubuntu/ssl:/etc/nginx/certs
+
+  backend:
+    restart: always
+    container_name: backend
+    build: ./backend
+    expose:
+      - 5000
+    volumes:
+      - ./backend:/usr/src/app
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/usr/src/app/my-key.json
+      - FLASK_ENV=development
+      #- FLASK_APP=app.py
+      - FLASK_DEBUG=1
+
+  rabbitmq:
+    image: rabbitmq:latest
+    ports: 
+      - 5672:5672
+      - 15672:15672
+    
+    

@@ -1,7 +1,7 @@
 from celery import Celery
 
 # amqp://[username]:[password]@localhost:5672/
-BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+BROKER_URL = 'amqp://guest:guest@rabbitmq:5672/'
 
 def make_celery(app):
     cell =  Celery(app.import_name, broker=BROKER_URL, )

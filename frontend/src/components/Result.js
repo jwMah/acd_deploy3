@@ -204,7 +204,7 @@ class Result extends React.Component{
         console.log('click_save')
         console.log(this.state.changed_img_list)
         const api = axios.create({
-            baseURL: 'http://localhost:5000'
+            //baseURL: 'http://localhost:5000'
         })
         
         var send_changed_censored = this.state.changed_img_list //바뀐 데이터
@@ -218,7 +218,7 @@ class Result extends React.Component{
             var send_changed_censored = click_save_this.state.changed_img_list.concat(
                 {id : 0,  censored : click_save_this.state.video_final_censored}
             )
-            api.post('/update', send_changed_censored)
+            api.post('api/update', send_changed_censored)
               .then(function (response) {
                 console.log(response);
             }).catch(function (error) {

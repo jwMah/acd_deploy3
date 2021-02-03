@@ -1,5 +1,5 @@
 import sys, os
-from flask import Flask, request
+from flask import Flask, request, Blueprint
 from flask_cors import CORS
 from function import kakao_api, ffmpeg
 from werkzeug.utils import secure_filename
@@ -23,7 +23,10 @@ CORS(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = config['DEFAULT']['SQLALCHEMY_DATABASE_URI']
 # 추가하지 않을 시 FSADeprecationWarning 주의가 떠서 추가해 줌
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+api = Blueprint('api',__name__)
+
 
 import tasks
 # import dbcon
@@ -41,7 +44,7 @@ video_type = 0
 list_dir = 0
 
     
-@app.route('/videoUploading', methods=['POST'])
+@api.route('/videoUploading', methods=['POST'])
 def videoUploading():
     global video_id
     Your_input = ''
@@ -99,7 +102,7 @@ def videoUploading():
     return {'video_filename' : video_filename }
 
 
-@app.route('/frameUploading', methods=['POST'])
+@api.route('/frameUploading', methods=['POST'])
 def frameUploading():
     global list_dir
     global video_filename
@@ -113,7 +116,7 @@ def frameUploading():
     return {'result' : result}
 
 
-@app.route('/detectFinal', methods=['POST'])
+@api.route('/detectFinal', methods=['POST'])
 def detectFinal(): 
     global video_id
     global video_filename
@@ -167,7 +170,7 @@ def detectFinal():
 
 
 # read contents analysis from DB
-@app.route('/frame', methods=['POST'])
+@api.route('/frame', methods=['POST'])
 def readdb():
     global video_id
     global video_filename
@@ -188,7 +191,7 @@ def readdb():
     return {'img_dict' : img_dict }
 
 #바뀐 frame censored와 video censored 업데이트 request 처리
-@app.route('/update', methods=['POST'])
+@api.route('/update', methods=['POST'])
 def update():
     changed_lists = request.get_json(force=True)
 
@@ -209,3 +212,6 @@ def update():
         
         count = count+1
     return {'changed_count' : count}
+
+
+app.register_blueprint(api, url_prefix='/api')
