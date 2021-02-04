@@ -4,7 +4,7 @@ from function import gcp_control
 import ffmpeg
 
 def video_to_Img(file_path,video_filename):
-    
+    img_count = 0
     try:
         ffmpeg.input(file_path).filter('fps', fps='1/30').output('data/frm-%d.jpg', start_number=0).overwrite_output().run(quiet=True)
     except ffmpeg.Error as e:
@@ -16,12 +16,13 @@ def video_to_Img(file_path,video_filename):
     list_dir.remove('.keep')
     
     for filename in list_dir:
+        img_count = img_count + 1
         # upload local image files to gcp storage
         gcp_control.upload_blob_filename('teamg-data','data/' + filename, video_filename+'/'+filename)
         # delete local image files
         os.remove('././data/' + filename)
     
-    return list_dir
+    return img_count
 
     # out,err = result.communicate()
     # exitcode = result.returncode

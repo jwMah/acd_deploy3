@@ -17,9 +17,12 @@ services:
     build: ./backend
     expose:
       - 5000
+      - 5672
     volumes:
       - ./backend:/usr/src/app
     environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONIOENCODING=UTF-8
       - GOOGLE_APPLICATION_CREDENTIALS=/usr/src/app/my-key.json
       - FLASK_ENV=development
       #- FLASK_APP=app.py
@@ -42,4 +45,3 @@ services:
     command: -A app.celery worker --loglevel=info
     volumes:
       - ./backend:/usr/src/app
-

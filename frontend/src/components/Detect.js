@@ -129,7 +129,7 @@ class Detect extends React.Component{
             return setTimeout(function() {
                 home_this.final_detect();
                 return 1;
-            }, 5000);
+            }, 3000);
         }).catch(function (error) {
             console.log(error);
           });

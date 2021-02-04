@@ -18,6 +18,8 @@ services:
     volumes:
       - ./backend:/usr/src/app
     environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONIOENCODING=UTF-8
       - GOOGLE_APPLICATION_CREDENTIALS=/usr/src/app/my-key.json
       - FLASK_ENV=development
       #- FLASK_APP=app.py
@@ -39,7 +41,5 @@ services:
     hostname: celery
     entrypoint: celery
     command: -A app.celery worker --loglevel=info
-    ports: 
-      - 5672:5672
     volumes:
       - ./backend:/usr/src/app

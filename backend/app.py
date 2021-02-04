@@ -41,8 +41,8 @@ video_filename = ''
 video_path= ''
 video_path_signed = ''
 video_type = ''
-list_dir = []
-
+#list_dir = []
+img_count = 1
     
 @api.route('/videoUploading', methods=['POST'])
 def videoUploading():
@@ -96,26 +96,29 @@ def videoUploading():
         video_path_signed = gcp_control.generate_download_signed_url_v4('teamg-data', video_filename)
         eta = datetime.utcnow() + timedelta(seconds=2)
         tasks.async_video_insert.apply_async(args=['youtube',video_filename, video_path], kwargs={},eta=eta)
-        # views.video_insert('youtube',video_filename,'https://storage.googleapis.com/teamg-data/'+video_filename)
+        #views.video_insert('youtube',video_filename,'https://storage.googleapis.com/teamg-data/'+video_filename)
+        views.get_video_id()
         video_type = 'youtube'
-        print(video_path_signed)
 
     return {'video_filename' : video_filename }
 
 
 @api.route('/frameUploading', methods=['POST'])
 def frameUploading():
-    global list_dir
+    #global list_dir
     global video_filename
     global video_path
     global video_path_signed
-    
+    global img_count
+    print(img_count)
+    views.get_path_by_id(id)
     # ( 공통 process ) upload frames to gcp storage
-    list_dir = ffmpeg.video_to_Img(video_path_signed,video_filename)
+    img_count = ffmpeg.video_to_Img(video_path_signed,video_filename)
+    print(img_count)
     # video filename, frame 갯수
     result = {}
     result['video_filename'] = video_filename
-    result['frame_counts'] = len(list_dir)
+    result['frame_counts'] = img_count
     return {'result' : result}
 
 
@@ -126,31 +129,32 @@ def detectFinal():
     global video_path
     global video_path_signed
     global video_type
-    global list_dir
+    #global list_dir
+    global img_count
 
     # insert contents analysis to DB
     result = {}
-    count=0
     censored_G = 0
     censored_PG = 0
     censored_R = 0
-    
+    count = 1
     video_id = views.get_video_id(video_filename)
-
-    for filename in list_dir:
-        count += 1
+    #
+    print(img_count)
+    for num in range(img_count):
         detect_result = kakao_api.detect_adult(video_path+'/'+'frm-'+ str(count-1) +'.jpg', 0)
         views.frame_insert(int(video_id[0]), video_path +'/'+'frm-'+ str(count-1)+'.jpg', 'frm-'+ str(count-1)+'.jpg', count*30000-15000, detect_result)
+        count = count + 1
 
         if detect_result == 'G':
-            censored_G += 1
+            censored_G = censored_G + 1
         elif detect_result == 'PG':
-            censored_PG += 1
+            censored_PG = censored_PG + 1
         else:
-            censored_R +=1
+            censored_R = censored_R + 1
 
-    pct_PG = censored_PG / count
-    pct_R = censored_R / count
+    pct_PG = censored_PG / img_count
+    pct_R = censored_R / img_count
     if pct_R==0 and pct_PG <= 0.2:
         censored = 'G'
     elif pct_R <= 0.2:
@@ -158,7 +162,7 @@ def detectFinal():
     else:
         censored = 'R'
     result['censored'] = censored
-
+    #views.video_censored(int(video_id[0]), censored)
     eta = datetime.utcnow() + timedelta(seconds=2)
     tasks.async_video_censored.apply_async(args=[int(video_id[0]), censored], kwargs={},eta=eta)
 
@@ -210,6 +214,7 @@ def update():
             eta = datetime.utcnow() + timedelta(seconds=2)
             tasks.async_video_update.apply_async(args=[video_id[0], censored], kwargs={},eta=eta)
         else:
+            print('sibal')
             eta = datetime.utcnow() + timedelta(seconds=2)
             tasks.async_frame_update.apply_async(args=[changed_img['id'], changed_img['censored']], kwargs={},eta=eta)
         
